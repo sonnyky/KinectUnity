@@ -14,7 +14,11 @@ public class BodySourceView : MonoBehaviour
     private List<MeteorHand> meteors = new List<MeteorHand>();
     private bool newMeteorIsFound = false;
 
+    //Gesture detection
     private VisualGestureBuilderFrameSource _VGB_Source;
+    private IDictionary<Gesture, DiscreteGestureResult> detectedGestures;
+    private bool TargetGesturesToDetect = false; //This maybe multiple in the future
+    private float effectiveDistance = 15f;
 
     //描かれる軌跡
     public GameObject effects;
@@ -73,6 +77,7 @@ public class BodySourceView : MonoBehaviour
         }
 
         if (_VGB_Source == null) _VGB_Source = _BodyManager.GetRecordedGesturesData();
+        detectedGestures = _BodyManager.GetDetectedGestures();
 
         List<ulong> trackedIds = new List<ulong>();
         foreach(var body in data)
@@ -86,6 +91,7 @@ public class BodySourceView : MonoBehaviour
             {
                 trackedIds.Add(body.TrackingId);
                 _VGB_Source.TrackingId = body.TrackingId;
+                TargetGesturesToDetect = DetectTargetGestureOnBodies("SwipeRight", body.TrackingId.ToString());
                 // 手についているエフェクト
                 if(meteors.Count == 0)
                 {
@@ -114,9 +120,31 @@ public class BodySourceView : MonoBehaviour
                 {
                     if (newMeteorIsFound == false)
                     {
+                        Vector3 hand_tip_pos = GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]);
+                        Vector3 effect_pos = hand_tip_pos;
                         SetMeteorObjectPos(meteor.MeteorObject, GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]));
-                        GameObject effect = GameObject.Instantiate(effects);
-                        effect.transform.localPosition = GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]);
+
+                        //Create effects
+                        //Debug.Log(hand_tip_pos.z);
+                        if (hand_tip_pos.z >= effectiveDistance)
+                        {
+                            if (TargetGesturesToDetect)
+                            {
+                                effect_pos.z = 0;
+                                GameObject effect = GameObject.Instantiate(effects);
+                                effect.name = "Effect_" + body.TrackingId.ToString();
+                                effect.transform.localPosition = effect_pos;
+                                effect.GetComponent<AutoDestroy>().SetupAnimation(true);
+                            }else
+                            {
+                                effect_pos.z = 0;
+                                GameObject effect = GameObject.Instantiate(effects);
+                                effect.name = "Effect_" + body.TrackingId.ToString();
+                                effect.transform.localPosition = effect_pos;
+                            }
+                          
+                           
+                        }
                         break;
                     }
                     else
@@ -161,7 +189,7 @@ public class BodySourceView : MonoBehaviour
                     _Bodies[body.TrackingId] = CreateBodyObject(body.TrackingId);
                 }
                 
-                RefreshBodyObject(body, _Bodies[body.TrackingId]);
+                //RefreshBodyObject(body, _Bodies[body.TrackingId]); //For drawing stick figure
                 _BodyManager.SetVGBReaderPauseState(false);
             }
         }
@@ -169,7 +197,10 @@ public class BodySourceView : MonoBehaviour
 
     private GameObject CreateBodyObject(ulong id)
     {
-        GameObject body = new GameObject("Body:" + id);        
+        GameObject body = new GameObject("Body:" + id);  
+        /*
+         *This part is to draw the stick figure and joints
+         *      
         for (Kinect.JointType jt = Kinect.JointType.SpineBase; jt <= Kinect.JointType.ThumbRight; jt++)
         {
             GameObject jointObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -183,7 +214,7 @@ public class BodySourceView : MonoBehaviour
             jointObj.name = jt.ToString();
             jointObj.transform.parent = body.transform;
         }
-        
+        */
         return body;
     }
     
@@ -261,5 +292,30 @@ public class BodySourceView : MonoBehaviour
         }
     }
    
+    public bool DetectTargetGestureOnBodies(string gestureName, string bodyTrackingId)
+    {
+        bool gestureDetected = false;
+        if (detectedGestures != null)
+        {
+            foreach (Gesture gesture in _VGB_Source.Gestures)
+            {
+                if (gesture.GestureType == GestureType.Discrete)
+                {
+                    DiscreteGestureResult result = null;
+                    detectedGestures.TryGetValue(gesture, out result);
+                    //Debug.Log(gesture.Name);
+                    if (result != null)
+                    {
+                        if(gesture.Name == gestureName && _VGB_Source.TrackingId.ToString() == bodyTrackingId && result.Detected)
+                        {
+                            Debug.Log(" Target Gesture Detected");
+                            gestureDetected = true;
+                        }
+                    }
+                }
+            }
+        }
+        return gestureDetected;
+    }
 
 }

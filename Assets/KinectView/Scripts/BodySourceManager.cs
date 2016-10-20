@@ -13,12 +13,17 @@ public class BodySourceManager : MonoBehaviour
     private Body[] _Data = null;
 
     //カスタムジェスチャーファイル
-    private string gestureDatabaseFileName = "Seated.gbd";
+    private string gestureDatabaseFileName = "SwipeRight.gbd";
     private string gestureName = "Circular";
     private VisualGestureBuilderFrameSource _VGB_Source;
     private VisualGestureBuilderFrameReader _VGB_Reader;
     private VisualGestureBuilderDatabase _Database;
     private IDictionary<Gesture, DiscreteGestureResult> discreteGestureDetectionResults;
+
+    public IDictionary<Gesture, DiscreteGestureResult> GetDetectedGestures()
+    {
+        return discreteGestureDetectionResults;
+    }
 
     public VisualGestureBuilderFrameSource GetRecordedGesturesData()
     {
@@ -124,26 +129,8 @@ public class BodySourceManager : MonoBehaviour
             {
                 // get the discrete gesture results which arrived with the latest frame
                 IDictionary<Gesture, DiscreteGestureResult> discreteResults = frame.DiscreteGestureResults;
-
-                if (discreteResults != null)
-                {
-                    foreach (Gesture gesture in _VGB_Source.Gestures)
-                    {
-                        if (gesture.GestureType == GestureType.Discrete)
-                        {
-                            Debug.Log(gesture.Name);
-                            Debug.Log(_VGB_Source.TrackingId);
-                            DiscreteGestureResult result = null;
-                            discreteResults.TryGetValue(gesture, out result);
-                            Debug.Log( result);
-                            if (result != null)
-                            {
-                               
-                                Debug.Log("Detected Gesture " );
-                            }
-                        }
-                    }
-                }
+                discreteGestureDetectionResults = discreteResults;
+               
             }
         }
     }
