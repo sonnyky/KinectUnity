@@ -6,6 +6,8 @@ using Microsoft.Kinect.VisualGestureBuilder;
 
 public class BodySourceView : MonoBehaviour 
 {
+    private AnimationManager animationManager;
+
     public Material BoneMaterial;
     public GameObject BodySourceManager;
 
@@ -17,8 +19,9 @@ public class BodySourceView : MonoBehaviour
     //Gesture detection
     private VisualGestureBuilderFrameSource _VGB_Source;
     private IDictionary<Gesture, DiscreteGestureResult> detectedGestures;
+    private IDictionary<Gesture, ContinuousGestureResult> detectedContinuousGestures;
     private bool TargetGesturesToDetect = false; //This maybe multiple in the future
-    private float effectiveDistance = 15f;
+    private float effectiveDistance = 9f;
 
     //描かれる軌跡
     public GameObject effects;
@@ -56,6 +59,11 @@ public class BodySourceView : MonoBehaviour
         { Kinect.JointType.SpineShoulder, Kinect.JointType.Neck },
         { Kinect.JointType.Neck, Kinect.JointType.Head },
     };
+
+    void Start()
+    {
+        animationManager = GameObject.Find("AnimationManager").GetComponent<AnimationManager>();
+    }
     
     void Update () 
     {
@@ -76,9 +84,9 @@ public class BodySourceView : MonoBehaviour
             return;
         }
 
-        if (_VGB_Source == null) _VGB_Source = _BodyManager.GetRecordedGesturesData();
+         _VGB_Source = _BodyManager.GetRecordedGesturesData();
         detectedGestures = _BodyManager.GetDetectedGestures();
-
+        detectedContinuousGestures = _BodyManager.GetDetectedContinuousGestures();
         List<ulong> trackedIds = new List<ulong>();
         foreach(var body in data)
         {
@@ -92,6 +100,15 @@ public class BodySourceView : MonoBehaviour
                 trackedIds.Add(body.TrackingId);
                 _VGB_Source.TrackingId = body.TrackingId;
                 TargetGesturesToDetect = DetectTargetGestureOnBodies("SwipeRight", body.TrackingId.ToString());
+
+                if (TargetGesturesToDetect)
+                {
+                    animationManager.EnableAnimation(true, body.TrackingId.ToString());
+                }else
+                {
+                    animationManager.EnableAnimation(false, body.TrackingId.ToString());
+                }
+
                 // 手についているエフェクト
                 if(meteors.Count == 0)
                 {
@@ -120,13 +137,13 @@ public class BodySourceView : MonoBehaviour
                 {
                     if (newMeteorIsFound == false)
                     {
-                        Vector3 hand_tip_pos = GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]);
+                        Vector3 hand_tip_pos = GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipLeft]);
                         Vector3 effect_pos = hand_tip_pos;
-                        SetMeteorObjectPos(meteor.MeteorObject, GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]));
+                        SetMeteorObjectPos(meteor.MeteorObject, GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipLeft]));
 
                         //Create effects
                         //Debug.Log(hand_tip_pos.z);
-                        if (hand_tip_pos.z >= effectiveDistance)
+                        if (hand_tip_pos.z <= effectiveDistance)
                         {
                             if (TargetGesturesToDetect)
                             {
@@ -134,7 +151,6 @@ public class BodySourceView : MonoBehaviour
                                 GameObject effect = GameObject.Instantiate(effects);
                                 effect.name = "Effect_" + body.TrackingId.ToString();
                                 effect.transform.localPosition = effect_pos;
-                                effect.GetComponent<AutoDestroy>().SetupAnimation(true);
                             }else
                             {
                                 effect_pos.z = 0;
@@ -294,27 +310,51 @@ public class BodySourceView : MonoBehaviour
    
     public bool DetectTargetGestureOnBodies(string gestureName, string bodyTrackingId)
     {
+        //Debug.Log("Detecting gestures");
         bool gestureDetected = false;
-        if (detectedGestures != null)
+        foreach (Gesture gesture in _VGB_Source.Gestures)
         {
-            foreach (Gesture gesture in _VGB_Source.Gestures)
+            if (detectedGestures != null)
             {
                 if (gesture.GestureType == GestureType.Discrete)
                 {
                     DiscreteGestureResult result = null;
                     detectedGestures.TryGetValue(gesture, out result);
-                    //Debug.Log(gesture.Name);
                     if (result != null)
                     {
-                        if(gesture.Name == gestureName && _VGB_Source.TrackingId.ToString() == bodyTrackingId && result.Detected)
+                        if (gesture.Name == gestureName && _VGB_Source.TrackingId.ToString() == bodyTrackingId && result.Detected)
                         {
-                            Debug.Log(" Target Gesture Detected");
+                           // Debug.Log("Detected gestures");
                             gestureDetected = true;
                         }
                     }
                 }
             }
+            /*
+            if (detectedContinuousGestures != null)
+            {
+                if (gesture.GestureType == GestureType.Continuous)
+                {
+                    ContinuousGestureResult result = null;
+                    detectedContinuousGestures.TryGetValue(gesture, out result);
+                  
+                    Debug.Log(gesture.Name);
+                    if (result != null)
+                    {
+                        Debug.Log(result.Progress);
+                        if (gesture.Name == gestureName && _VGB_Source.TrackingId.ToString() == bodyTrackingId)
+                        {
+                            
+                            gestureDetected = false;
+                        }
+                    }
+                }
+            }
+            */
+
         }
+
+     
         return gestureDetected;
     }
 

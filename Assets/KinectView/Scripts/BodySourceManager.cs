@@ -19,12 +19,17 @@ public class BodySourceManager : MonoBehaviour
     private VisualGestureBuilderFrameReader _VGB_Reader;
     private VisualGestureBuilderDatabase _Database;
     private IDictionary<Gesture, DiscreteGestureResult> discreteGestureDetectionResults;
+    private IDictionary<Gesture, ContinuousGestureResult> continuousGestureDetectionResults;
 
     public IDictionary<Gesture, DiscreteGestureResult> GetDetectedGestures()
     {
         return discreteGestureDetectionResults;
     }
 
+    public IDictionary<Gesture, ContinuousGestureResult> GetDetectedContinuousGestures()
+    {
+        return continuousGestureDetectionResults;
+    }
     public VisualGestureBuilderFrameSource GetRecordedGesturesData()
     {
         return _VGB_Source;
@@ -40,7 +45,6 @@ public class BodySourceManager : MonoBehaviour
         this._VGB_Reader.IsPaused = state;
     }
     
-
     void Start () 
     {
         _Sensor = KinectSensor.GetDefault();
@@ -130,7 +134,11 @@ public class BodySourceManager : MonoBehaviour
                 // get the discrete gesture results which arrived with the latest frame
                 IDictionary<Gesture, DiscreteGestureResult> discreteResults = frame.DiscreteGestureResults;
                 discreteGestureDetectionResults = discreteResults;
-               
+
+                // get the discrete gesture results which arrived with the latest frame
+                IDictionary<Gesture, ContinuousGestureResult> continuousResults = frame.ContinuousGestureResults;
+                continuousGestureDetectionResults = continuousResults;
+
             }
         }
     }
