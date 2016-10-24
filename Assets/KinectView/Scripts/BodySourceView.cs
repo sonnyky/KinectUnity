@@ -99,81 +99,15 @@ public class BodySourceView : MonoBehaviour
             {
                 trackedIds.Add(body.TrackingId);
                 _VGB_Source.TrackingId = body.TrackingId;
-                TargetGesturesToDetect = DetectTargetGestureOnBodies("SwipeRight", body.TrackingId.ToString());
-
-                if (TargetGesturesToDetect && body.HandRightState == Kinect.HandState.Open)
-                {
-                    animationManager.EnableAnimation(true, body.TrackingId.ToString());
-                }else
-                {
-                    animationManager.EnableAnimation(false, body.TrackingId.ToString());
-                }
-
-                // 手についているエフェクト
-                if(meteors.Count == 0)
-                {
-                    MeteorHand thisMeteor;
-                    thisMeteor.MeteorObject = (GameObject)Instantiate(TrackObject);
-                    thisMeteor.MeteorObject.name = "MeteorObject" + body.TrackingId.ToString();
-                    thisMeteor.TrackingId = body.TrackingId;
-                    meteors.Add(thisMeteor);
-                }
-                MeteorHand newFoundMeteor;
-                newFoundMeteor.TrackingId = 0;
-                newFoundMeteor.MeteorObject = null;
-                foreach (MeteorHand meteor in meteors)
-                {
-                    if (meteor.TrackingId == body.TrackingId)
-                    {
-                        //Found a meteor that corresponds to this body
-                        newMeteorIsFound = false;
-                        break;
-                    }else
-                    {
-                        // This body is not yet associated with any meteors
-                        newMeteorIsFound = true;
-                    }
-                }
                 
-                foreach (MeteorHand meteor in meteors)
+                if (CheckIfThisBodyHasMarker(body.TrackingId))
                 {
-                    if (newMeteorIsFound == false)
-                    {
-                        Vector3 hand_tip_pos = GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]);
-                        Vector3 effect_pos = hand_tip_pos;
-                        SetMeteorObjectPos(meteor.MeteorObject, GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]));
-
-                        //Create effects
-                        if (hand_tip_pos.z <= effectiveDistance)
-                        {
-                            if (TargetGesturesToDetect)
-                            {
-                                effect_pos.z = 0;
-                                GameObject effect = GameObject.Instantiate(effects);
-                                effect.name = "Effect_" + body.TrackingId.ToString();
-                                effect.transform.localPosition = effect_pos;
-                            }else
-                            {
-                                effect_pos.z = 0;
-                                GameObject effect = GameObject.Instantiate(effects);
-                                effect.name = "Effect_" + body.TrackingId.ToString();
-                                effect.transform.localPosition = effect_pos;
-                            }                       
-                        }
-                        break;
-                    }
-                    else
-                    {
-                        Debug.Log("meteor tracking id is not present");
-                        newFoundMeteor.MeteorObject = (GameObject)Instantiate(TrackObject);
-                        newFoundMeteor.MeteorObject.name = "MeteorObject" + body.TrackingId.ToString();
-                        newFoundMeteor.TrackingId = body.TrackingId;
-                    }
+                    SetMeteorObjectPos(GameObject.Find("MeteorObject" + body.TrackingId), GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]), body.TrackingId);
                 }
-                if(newFoundMeteor.TrackingId != 0)
+                else
                 {
-                    meteors.Add(newFoundMeteor);
-                }
+                    CreateNewHandMarker(body.TrackingId);        
+                }           
             }
         }
         
@@ -185,23 +119,18 @@ public class BodySourceView : MonoBehaviour
             if(!trackedIds.Contains(trackingId))
             {
                 Destroy(_Bodies[trackingId]);
-                Destroy(GameObject.Find("MeteorObject" + trackingId.ToString()));
                 _Bodies.Remove(trackingId);
+                _BodyManager.SetVGBReaderPauseState(true);
 
-                MeteorHand meteorToRemove;
-                meteorToRemove.TrackingId = 0;
-                meteorToRemove.MeteorObject = null;
-                foreach (MeteorHand meteor in meteors)
-                {
-                    if(meteor.TrackingId == trackingId)
+                for (int i = meteors.Count - 1; i >= 0 ; i--) {
+                    if (meteors[i].TrackingId == trackingId)
                     {
-                        meteorToRemove = meteor;
+                        meteors.RemoveAt(i);
+                        Destroy(GameObject.Find("MeteorObject" + trackingId));
+                        break;
                     }
                 }
-                if (meteorToRemove.TrackingId != 0) {
-                    meteors.Remove(meteorToRemove);
-                }
-                _BodyManager.SetVGBReaderPauseState(true);
+
             }
         }
 
@@ -294,20 +223,19 @@ public class BodySourceView : MonoBehaviour
     {
         return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
     }
-    private void  SetMeteorObjectPos(GameObject MeteorObject, Vector3 RightHandPos)
+    private void  SetMeteorObjectPos(GameObject MeteorObject, Vector3 newPos, ulong trackingId)
     {
         if (MeteorObject == null)
         {
             return;
         }
-        MeteorObject.transform.localPosition = RightHandPos;
+        MeteorObject.transform.localPosition = newPos;
     }
     public struct MeteorHand
     {
         public ulong TrackingId;
         public GameObject MeteorObject;
     }
-
     public struct EventArgs
     {
         public string name;
@@ -370,4 +298,29 @@ public class BodySourceView : MonoBehaviour
         return gestureDetected;
     }
 
+    private bool CheckIfThisBodyHasMarker(ulong trackingId)
+    {
+        bool result = false;
+        foreach (MeteorHand meteor in meteors)
+        {
+           if(meteor.TrackingId == trackingId)
+            {
+                result = true;
+            }
+        }
+        return result;
+    }
+    private void CreateNewHandMarker(ulong trackingId)
+    {
+        MeteorHand thisMeteor;
+        thisMeteor.TrackingId = trackingId;
+        thisMeteor.MeteorObject = (GameObject)Instantiate(TrackObject);
+        thisMeteor.MeteorObject.name = "MeteorObject" +trackingId.ToString();
+        meteors.Add(thisMeteor);
+    }
+    private void CreateGestureEffects(ulong trackingId)
+    {
+        GameObject effect = GameObject.Instantiate(effects);
+        effect.name = "EffectObject" + trackingId.ToString();
+    }
 }
