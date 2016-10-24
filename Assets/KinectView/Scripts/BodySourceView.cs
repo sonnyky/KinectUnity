@@ -89,7 +89,6 @@ public class BodySourceView : MonoBehaviour
         {
             return;
         }
-        data[0] = data[3];
 
         //_VGB_Source = _BodyManager.GetRecordedGesturesData();
         //detectedGestures = _BodyManager.GetDetectedGestures();
