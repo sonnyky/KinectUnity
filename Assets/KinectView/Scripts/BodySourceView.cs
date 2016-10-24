@@ -4,10 +4,14 @@ using System.Collections.Generic;
 using Kinect = Windows.Kinect;
 using Microsoft.Kinect.VisualGestureBuilder;
 
+#if UNITY_5_3 || UNITY_5_3_OR_NEWER
+using UnityEngine.SceneManagement;
+#endif
+using OpenCVForUnity;
+
 public class BodySourceView : MonoBehaviour 
 {
     private AnimationManager animationManager;
-
     public Material BoneMaterial;
     public GameObject BodySourceManager;
 
@@ -102,7 +106,8 @@ public class BodySourceView : MonoBehaviour
                 
                 if (CheckIfThisBodyHasMarker(body.TrackingId))
                 {
-                    SetMeteorObjectPos(GameObject.Find("MeteorObject" + body.TrackingId), GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]), body.TrackingId);
+                    SetObjectPos(GameObject.Find("MeteorObject" + body.TrackingId), GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]), body.TrackingId);
+                    CreateGestureEffects(body.TrackingId, GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]));
                 }
                 else
                 {
@@ -223,13 +228,13 @@ public class BodySourceView : MonoBehaviour
     {
         return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
     }
-    private void  SetMeteorObjectPos(GameObject MeteorObject, Vector3 newPos, ulong trackingId)
+    private void  SetObjectPos(GameObject Object, Vector3 newPos, ulong trackingId)
     {
-        if (MeteorObject == null)
+        if (Object == null)
         {
             return;
         }
-        MeteorObject.transform.localPosition = newPos;
+        Object.transform.localPosition = newPos;
     }
     public struct MeteorHand
     {
@@ -318,9 +323,10 @@ public class BodySourceView : MonoBehaviour
         thisMeteor.MeteorObject.name = "MeteorObject" +trackingId.ToString();
         meteors.Add(thisMeteor);
     }
-    private void CreateGestureEffects(ulong trackingId)
-    {
+    private void CreateGestureEffects(ulong trackingId, Vector3 Position)
+    {   
         GameObject effect = GameObject.Instantiate(effects);
-        effect.name = "EffectObject" + trackingId.ToString();
+        effect.name = "EffectObject_" + trackingId.ToString();
+        effect.transform.localPosition = Position;
     }
 }

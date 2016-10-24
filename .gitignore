@@ -29,3 +29,5 @@ obj/
 .Trashes
 ehthumbs.db
 Thumbs.db
+Assets/OpenCVForUnity/
+Assets/OpenCVForUnity.meta
