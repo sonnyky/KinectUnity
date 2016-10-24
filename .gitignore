@@ -31,3 +31,9 @@ ehthumbs.db
 Thumbs.db
 Assets/OpenCVForUnity/
 Assets/OpenCVForUnity.meta
+Assets/Scenes/KinectOpenCVForUnitySample.unity
+Assets/Scenes/KinectOpenCVForUnitySample.unity.meta
+Assets/Scripts/ColorFrameSample.cs
+Assets/Scripts/ColorFrameSample.cs.meta
+Assets/Scripts/MultiSourceFrameSample.cs
+Assets/Scripts/MultiSourceFrameSample.cs.meta

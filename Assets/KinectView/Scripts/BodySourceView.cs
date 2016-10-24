@@ -15,6 +15,8 @@ public class BodySourceView : MonoBehaviour
     public Material BoneMaterial;
     public GameObject BodySourceManager;
 
+    Kinect.Body dummyBody;
+
     //手についているエフェクト
     public GameObject TrackObject;
     private List<MeteorHand> meteors = new List<MeteorHand>();
@@ -87,31 +89,31 @@ public class BodySourceView : MonoBehaviour
         {
             return;
         }
+        data[0] = data[3];
 
-         _VGB_Source = _BodyManager.GetRecordedGesturesData();
-        detectedGestures = _BodyManager.GetDetectedGestures();
-        detectedContinuousGestures = _BodyManager.GetDetectedContinuousGestures();
+        //_VGB_Source = _BodyManager.GetRecordedGesturesData();
+        //detectedGestures = _BodyManager.GetDetectedGestures();
+        //detectedContinuousGestures = _BodyManager.GetDetectedContinuousGestures();
         List<ulong> trackedIds = new List<ulong>();
         foreach(var body in data)
         {
             if (body == null)
             {
                 continue;
-              }
-                
-            if(body.IsTracked)
+            }
+            Vector3 handTipPosition = GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]);
+            if (body.IsTracked)
             {
                 trackedIds.Add(body.TrackingId);
-                _VGB_Source.TrackingId = body.TrackingId;
+                //_VGB_Source.TrackingId = body.TrackingId;
                 
                 if (CheckIfThisBodyHasMarker(body.TrackingId))
                 {
-                    SetObjectPos(GameObject.Find("MeteorObject" + body.TrackingId), GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]), body.TrackingId);
                     CreateGestureEffects(body.TrackingId, GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]));
                 }
                 else
                 {
-                    CreateNewHandMarker(body.TrackingId);        
+                   CreateNewHandMarker(body.TrackingId);        
                 }           
             }
         }
@@ -125,17 +127,8 @@ public class BodySourceView : MonoBehaviour
             {
                 Destroy(_Bodies[trackingId]);
                 _Bodies.Remove(trackingId);
-                _BodyManager.SetVGBReaderPauseState(true);
-
-                for (int i = meteors.Count - 1; i >= 0 ; i--) {
-                    if (meteors[i].TrackingId == trackingId)
-                    {
-                        meteors.RemoveAt(i);
-                        Destroy(GameObject.Find("MeteorObject" + trackingId));
-                        break;
-                    }
-                }
-
+               // _BodyManager.SetVGBReaderPauseState(true);
+               Destroy(GameObject.Find("MeteorObject_" + trackingId));
             }
         }
 
@@ -154,7 +147,7 @@ public class BodySourceView : MonoBehaviour
                 }
                 
                 RefreshBodyObject(body, _Bodies[body.TrackingId]); //For drawing stick figure
-                _BodyManager.SetVGBReaderPauseState(false);
+                //_BodyManager.SetVGBReaderPauseState(false);
             }
         }
     }
@@ -228,14 +221,7 @@ public class BodySourceView : MonoBehaviour
     {
         return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
     }
-    private void  SetObjectPos(GameObject Object, Vector3 newPos, ulong trackingId)
-    {
-        if (Object == null)
-        {
-            return;
-        }
-        Object.transform.localPosition = newPos;
-    }
+
     public struct MeteorHand
     {
         public ulong TrackingId;
@@ -320,7 +306,7 @@ public class BodySourceView : MonoBehaviour
         MeteorHand thisMeteor;
         thisMeteor.TrackingId = trackingId;
         thisMeteor.MeteorObject = (GameObject)Instantiate(TrackObject);
-        thisMeteor.MeteorObject.name = "MeteorObject" +trackingId.ToString();
+        thisMeteor.MeteorObject.name = "MeteorObject_" +trackingId.ToString();
         meteors.Add(thisMeteor);
     }
     private void CreateGestureEffects(ulong trackingId, Vector3 Position)

@@ -12,6 +12,10 @@ public class BodySourceManager : MonoBehaviour
     private BodyFrameReader _Reader;
     private Body[] _Data = null;
 
+    //Opencv用
+    Texture2D texture;
+    byte[] data;
+
     //カスタムジェスチャーファイル
     private string gestureDatabaseFileName = "SwipeRight.gbd";
     private string gestureName = "Circular";
@@ -58,6 +62,10 @@ public class BodySourceManager : MonoBehaviour
                 _Sensor.Open();
                 // Set up Gesture Source
                 _VGB_Source = VisualGestureBuilderFrameSource.Create(_Sensor, 0);
+                // Set up the color image source
+                FrameDescription frameDesc = _Sensor.ColorFrameSource.CreateFrameDescription(ColorImageFormat.Rgba);
+                texture = new Texture2D(frameDesc.Width, frameDesc.Height, TextureFormat.RGBA32, false);
+                data = new byte[frameDesc.BytesPerPixel * frameDesc.LengthInPixels];
                 // open the reader for the vgb frames
                 _VGB_Reader = _VGB_Source.OpenReader();
                 if (_VGB_Reader != null)
