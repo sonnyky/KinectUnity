@@ -34,21 +34,22 @@ public class AnimationManager : MonoBehaviour {
 
     public void AddWayPoint(List<Vector3> wayPoint)
     {
-        waypointsGrouped.Add(dictionaryKeyForWayPoints++, wayPoint);
+        StartAnimation(wayPoint);
+       
+    }
+
+    private void StartAnimation(List<Vector3> wayPoint)
+    {
         GameObject truck = GameObject.Instantiate(animationObject);
         truck.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-        if (wayPoint[0].x < wayPoint[wayPoint.Count-1].x)
+        if (wayPoint[0].x < wayPoint[wayPoint.Count - 1].x)
         {
-            truck.transform.Rotate( new Vector3(0, 90f, 0));
-        }else
+            truck.transform.Rotate(new Vector3(0, 90f, 0));
+        }
+        else
         {
             truck.transform.Rotate(new Vector3(0, -90f, 0));
         }
         truck.GetComponent<ObjectFollowsPath>().SetPathToFollow(wayPoint);
-    }
-
-    private void StartAnimation()
-    {
-        
     }
 }

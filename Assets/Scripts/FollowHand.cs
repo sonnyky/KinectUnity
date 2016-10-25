@@ -105,10 +105,7 @@ public class FollowHand : MonoBehaviour
                     handTipPosition.z = 0;
                     tempTrainPoints.Add(handTipPosition);
                     CreateGestureEffects(body.TrackingId, handTipPosition);
-
                 }
-
-
             }
         }
     }

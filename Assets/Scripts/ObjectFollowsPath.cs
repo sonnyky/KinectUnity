@@ -24,19 +24,24 @@ public class ObjectFollowsPath : MonoBehaviour {
         pathToFollow = path;
         gameObject.transform.position = pathToFollow[0];
         tempPosition = pathToFollow[0];
-       
-        for (int i = 0; i<pathToFollow.Count; i++)
+        Vector3[] Path = new Vector3[pathToFollow.Count]; 
+        for(int i=0; i< pathToFollow.Count-1; i++)
         {
-            Hashtable moveHash = new Hashtable();
-            moveHash.Add("position", pathToFollow[i]);
-            moveHash.Add("time", 8f);
-            moveHash.Add("delay", .5f);
-            moveHash.Add("easeType", "easeInOutBack");
-            moveHash.Add("oncomplete", "AnimationEnd");
-            moveHash.Add("orienttopath", true);
-            moveHash.Add("oncompletetarget", this.gameObject);
-            iTween.MoveTo(gameObject,  moveHash);
+            Path[i] = pathToFollow[i];
         }
+
+
+        Hashtable moveHash = new Hashtable();
+        moveHash.Add("path", Path);
+        moveHash.Add("time", 10f);
+        moveHash.Add("axis", "x");
+        moveHash.Add("delay", .1f);
+        moveHash.Add("easeType", "linear");
+        moveHash.Add("oncomplete", "AnimationEnd");
+        moveHash.Add("orienttopath", true);
+        moveHash.Add("oncompletetarget", this.gameObject);
+        iTween.MoveTo(gameObject,  moveHash);
+        
     }
 
     private void AnimationEnd()
