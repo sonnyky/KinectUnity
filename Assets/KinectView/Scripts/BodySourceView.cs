@@ -29,9 +29,6 @@ public class BodySourceView : MonoBehaviour
     private bool TargetGesturesToDetect = false; //This maybe multiple in the future
     private float effectiveDistance = 9f;
 
-    //描かれる軌跡
-    public GameObject effects;
-
     private Dictionary<ulong, GameObject> _Bodies = new Dictionary<ulong, GameObject>();
     private BodySourceManager _BodyManager;
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
@@ -101,6 +98,8 @@ public class BodySourceView : MonoBehaviour
                 continue;
             }
             Vector3 handTipPosition = GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]);
+            
+         
             if (body.IsTracked)
             {
                 trackedIds.Add(body.TrackingId);
@@ -108,7 +107,6 @@ public class BodySourceView : MonoBehaviour
                 
                 if (CheckIfThisBodyHasMarker(body.TrackingId))
                 {
-                    CreateGestureEffects(body.TrackingId, GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]));
                 }
                 else
                 {
@@ -126,7 +124,7 @@ public class BodySourceView : MonoBehaviour
             {
                 Destroy(_Bodies[trackingId]);
                 _Bodies.Remove(trackingId);
-               // _BodyManager.SetVGBReaderPauseState(true);
+               //_BodyManager.SetVGBReaderPauseState(true);
                Destroy(GameObject.Find("MeteorObject_" + trackingId));
             }
         }
@@ -308,10 +306,5 @@ public class BodySourceView : MonoBehaviour
         thisMeteor.MeteorObject.name = "MeteorObject_" +trackingId.ToString();
         meteors.Add(thisMeteor);
     }
-    private void CreateGestureEffects(ulong trackingId, Vector3 Position)
-    {   
-        GameObject effect = GameObject.Instantiate(effects);
-        effect.name = "EffectObject_" + trackingId.ToString();
-        effect.transform.localPosition = Position;
-    }
+    
 }

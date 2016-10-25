@@ -143,7 +143,7 @@ public class BodySourceManager : MonoBehaviour
                 IDictionary<Gesture, DiscreteGestureResult> discreteResults = frame.DiscreteGestureResults;
                 discreteGestureDetectionResults = discreteResults;
 
-                // get the discrete gesture results which arrived with the latest frame
+                // get the continuous gesture results which arrived with the latest frame
                 IDictionary<Gesture, ContinuousGestureResult> continuousResults = frame.ContinuousGestureResults;
                 continuousGestureDetectionResults = continuousResults;
 
