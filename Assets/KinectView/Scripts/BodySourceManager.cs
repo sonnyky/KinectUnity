@@ -18,7 +18,7 @@ public class BodySourceManager : MonoBehaviour
 
     //カスタムジェスチャーファイル
     private string gestureDatabaseFileName = "SwipeRight.gbd";
-    private string gestureName = "Circular";
+    private string gestureName = "SwipeRight";
     private VisualGestureBuilderFrameSource _VGB_Source;
     private VisualGestureBuilderFrameReader _VGB_Reader;
     private VisualGestureBuilderDatabase _Database;
@@ -143,22 +143,11 @@ public class BodySourceManager : MonoBehaviour
                 IDictionary<Gesture, DiscreteGestureResult> discreteResults = frame.DiscreteGestureResults;
                 discreteGestureDetectionResults = discreteResults;
 
-                // get the discrete gesture results which arrived with the latest frame
+                // get the continuous gesture results which arrived with the latest frame
                 IDictionary<Gesture, ContinuousGestureResult> continuousResults = frame.ContinuousGestureResults;
                 continuousGestureDetectionResults = continuousResults;
 
             }
-        }
-    }
-    public struct EventArgs
-    {
-        public string name;
-        public float confidence;
-
-        public EventArgs(string _name, float _confidence)
-        {
-            name = _name;
-            confidence = _confidence;
         }
     }
 }

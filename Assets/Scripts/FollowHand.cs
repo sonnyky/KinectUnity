@@ -14,19 +14,11 @@ public class FollowHand : MonoBehaviour
     private AnimationManager animationManager;
 
     private string currentObjectTrackingId;
-
-    //手についているエフェクト
-
-    //Gesture detection
-    private VisualGestureBuilderFrameSource _VGB_Source;
-    private IDictionary<Gesture, DiscreteGestureResult> detectedGestures;
-    private IDictionary<Gesture, ContinuousGestureResult> detectedContinuousGestures;
-    private bool TargetGesturesToDetect = false; //This maybe multiple in the future
-    private float effectiveDistance = 9f;
-
     //描かれる軌跡
+    public GameObject effects;
+    private Dictionary<string, Vector3[]> trainPoints = new Dictionary<string, Vector3[]>();
+    private List<Vector3> tempTrainPoints = new List<Vector3>(); 
 
-    private Dictionary<ulong, GameObject> _Bodies = new Dictionary<ulong, GameObject>();
     private BodySourceManager _BodyManager;
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
@@ -62,6 +54,7 @@ public class FollowHand : MonoBehaviour
 
     void Start()
     {
+        animationManager = GameObject.Find("AnimationManager").GetComponent<AnimationManager>();
         _BodyManager = GameObject.Find("KinectBodySourceManager").GetComponent<BodySourceManager>();
 
         string[] temp = gameObject.name.Split("_"[0]);
@@ -92,10 +85,26 @@ public class FollowHand : MonoBehaviour
             {
                 continue;
             }
+
             if (body.IsTracked && body.TrackingId.ToString() == currentObjectTrackingId)
             {
                 Vector3 handTipPosition = GetVector3FromJoint(body.Joints[Kinect.JointType.HandTipRight]);
                 gameObject.transform.localPosition = handTipPosition;
+                if (handTipPosition.z > 6.0f)
+                {
+                    if (tempTrainPoints.Count > 0)
+                    {
+                        Debug.Log(tempTrainPoints.Count);
+                        animationManager.AddWayPoint(tempTrainPoints);
+                        tempTrainPoints.Clear();
+                    }
+                    continue;
+                }else
+                {
+                    handTipPosition.z = 0;
+                    tempTrainPoints.Add(handTipPosition);
+                    CreateGestureEffects(body.TrackingId, handTipPosition);
+                }
             }
         }
     }
@@ -104,20 +113,11 @@ public class FollowHand : MonoBehaviour
     {
         return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
     }
-    private void SetObjectPos(GameObject Object, Vector3 newPos, ulong trackingId)
-    {
-        if (Object == null)
-        {
-            return;
-        }
-        Object.transform.localPosition = newPos;
-    }
-   /*
     private void CreateGestureEffects(ulong trackingId, Vector3 Position)
     {
         GameObject effect = GameObject.Instantiate(effects);
         effect.name = "EffectObject_" + trackingId.ToString();
         effect.transform.localPosition = Position;
     }
-    */
+
 }
