@@ -19,7 +19,6 @@ public class FollowHand : MonoBehaviour
     private Dictionary<string, Vector3[]> trainPoints = new Dictionary<string, Vector3[]>();
     private List<Vector3> tempTrainPoints = new List<Vector3>(); 
 
-    private Dictionary<ulong, GameObject> _Bodies = new Dictionary<ulong, GameObject>();
     private BodySourceManager _BodyManager;
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
@@ -113,14 +112,6 @@ public class FollowHand : MonoBehaviour
     private static Vector3 GetVector3FromJoint(Kinect.Joint joint)
     {
         return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
-    }
-    private void SetObjectPos(GameObject Object, Vector3 newPos, ulong trackingId)
-    {
-        if (Object == null)
-        {
-            return;
-        }
-        Object.transform.localPosition = newPos;
     }
     private void CreateGestureEffects(ulong trackingId, Vector3 Position)
     {

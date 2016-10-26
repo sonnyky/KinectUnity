@@ -15,12 +15,9 @@ public class BodySourceView : MonoBehaviour
     public Material BoneMaterial;
     public GameObject BodySourceManager;
 
-    Kinect.Body dummyBody;
-
     //手についているエフェクト
     public GameObject TrackObject;
     private List<MeteorHand> meteors = new List<MeteorHand>();
-    private bool newMeteorIsFound = false;
 
     //Gesture detection
     private VisualGestureBuilderFrameSource _VGB_Source;
@@ -86,10 +83,6 @@ public class BodySourceView : MonoBehaviour
         {
             return;
         }
-
-       // _VGB_Source = _BodyManager.GetRecordedGesturesData();
-        //detectedGestures = _BodyManager.GetDetectedGestures();
-        //detectedContinuousGestures = _BodyManager.GetDetectedContinuousGestures();
         List<ulong> trackedIds = new List<ulong>();
         foreach(var body in data)
         {
@@ -100,9 +93,7 @@ public class BodySourceView : MonoBehaviour
             if (body.IsTracked)
             {
                 trackedIds.Add(body.TrackingId);
-                //_VGB_Source.TrackingId = body.TrackingId;
-
-                if (!CheckIfThisBodyHasMarker(body.TrackingId)) CreateNewHandMarker(body.TrackingId);          
+                if (!CheckIfThisBodyHasMarker(body.TrackingId)) CreateNewHandMarker(body.TrackingId);
             }
         }
         
@@ -115,8 +106,7 @@ public class BodySourceView : MonoBehaviour
             {
                 Destroy(_Bodies[trackingId]);
                 _Bodies.Remove(trackingId);
-               //_BodyManager.SetVGBReaderPauseState(true);
-               Destroy(GameObject.Find("MeteorObject_" + trackingId));
+                Destroy(GameObject.Find("MeteorObject_" + trackingId));
             }
         }
 
@@ -133,11 +123,10 @@ public class BodySourceView : MonoBehaviour
                 {
                     _Bodies[body.TrackingId] = CreateBodyObject(body.TrackingId);
                 }
-                
                 RefreshBodyObject(body, _Bodies[body.TrackingId]); //For drawing stick figure
-                //_BodyManager.SetVGBReaderPauseState(false);
             }
         }
+
     }
 
     private GameObject CreateBodyObject(ulong id)
@@ -225,56 +214,6 @@ public class BodySourceView : MonoBehaviour
             name = _name;
             confidence = _confidence;
         }
-    }
-   
-    public bool DetectTargetGestureOnBodies(string gestureName, string bodyTrackingId)
-    {
-        //Debug.Log("Detecting gestures");
-        bool gestureDetected = false;
-        foreach (Gesture gesture in _VGB_Source.Gestures)
-        {
-            if (detectedGestures != null)
-            {
-                if (gesture.GestureType == GestureType.Discrete)
-                {
-                    DiscreteGestureResult result = null;
-                    detectedGestures.TryGetValue(gesture, out result);
-                    if (result != null)
-                    {
-                        if (gesture.Name == gestureName && _VGB_Source.TrackingId.ToString() == bodyTrackingId && result.Detected)
-                        {
-                           // Debug.Log("Detected gestures");
-                            gestureDetected = true;
-                        }
-                    }
-                }
-            }
-            /*
-            if (detectedContinuousGestures != null)
-            {
-                if (gesture.GestureType == GestureType.Continuous)
-                {
-                    ContinuousGestureResult result = null;
-                    detectedContinuousGestures.TryGetValue(gesture, out result);
-                  
-                    Debug.Log(gesture.Name);
-                    if (result != null)
-                    {
-                        Debug.Log(result.Progress);
-                        if (gesture.Name == gestureName && _VGB_Source.TrackingId.ToString() == bodyTrackingId)
-                        {
-                            
-                            gestureDetected = false;
-                        }
-                    }
-                }
-            }
-            */
-
-        }
-
-     
-        return gestureDetected;
     }
 
     private bool CheckIfThisBodyHasMarker(ulong trackingId)
