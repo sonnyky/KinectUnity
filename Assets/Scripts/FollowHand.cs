@@ -17,7 +17,8 @@ public class FollowHand : MonoBehaviour
     //描かれる軌跡
     public GameObject effects;
     private Dictionary<string, Vector3[]> trainPoints = new Dictionary<string, Vector3[]>();
-    private List<Vector3> tempTrainPoints = new List<Vector3>(); 
+    private List<Vector3> tempTrainPoints = new List<Vector3>();
+    private int counter = 0;
 
     private BodySourceManager _BodyManager;
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
@@ -51,12 +52,15 @@ public class FollowHand : MonoBehaviour
         { Kinect.JointType.SpineShoulder, Kinect.JointType.Neck },
         { Kinect.JointType.Neck, Kinect.JointType.Head },
     };
+    private bool isDrawing = false;
+    private Vector3 previousDrawnPoint, previousDrawnRotation;
 
     void Start()
     {
         animationManager = GameObject.Find("AnimationManager").GetComponent<AnimationManager>();
         _BodyManager = GameObject.Find("KinectBodySourceManager").GetComponent<BodySourceManager>();
-
+        previousDrawnPoint = new Vector3(-1f, -1f, -1f);
+        previousDrawnRotation = new Vector3(-1f, -1f, -1f);
         string[] temp = gameObject.name.Split("_"[0]);
         currentObjectTrackingId = temp[1];
     }
@@ -115,9 +119,29 @@ public class FollowHand : MonoBehaviour
     }
     private void CreateGestureEffects(ulong trackingId, Vector3 Position)
     {
-        GameObject effect = GameObject.Instantiate(effects);
-        effect.name = "EffectObject_" + trackingId.ToString();
-        effect.transform.localPosition = Position;
+        if (previousDrawnPoint.z >= 0 && counter%3 == 0)
+        {
+            GameObject effect = GameObject.Instantiate(effects, Position, Quaternion.identity) as GameObject;
+            effect.name = "EffectObject_" + trackingId.ToString();
+            effect.transform.localPosition = Position;
+            
+
+            //現在の位置と過去の位置から、一軸の回転を算出する
+            //とりあえずZ軸回り、床の場合はY軸回り。
+            float rotationAngle = Mathf.Rad2Deg * Mathf.Atan2((Position.y - previousDrawnPoint.y),(Position.x - previousDrawnPoint.x));
+            effect.transform.Rotate(0,0, rotationAngle);
+            Debug.Log(rotationAngle);
+           
+        }
+        counter++;
+        previousDrawnPoint = Position;
+    }
+    public void ResetEffectsParameters()
+    {
+        isDrawing = false;
+        previousDrawnPoint.x = -1f;
+        previousDrawnPoint.y = -1f;
+        previousDrawnPoint.z = -1f;
     }
 
 }
