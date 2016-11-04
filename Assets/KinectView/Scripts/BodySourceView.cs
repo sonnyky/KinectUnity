@@ -11,7 +11,6 @@ using OpenCVForUnity;
 
 public class BodySourceView : MonoBehaviour 
 {
-    private AnimationManager animationManager;
     public Material BoneMaterial;
     public GameObject BodySourceManager;
 
@@ -62,7 +61,6 @@ public class BodySourceView : MonoBehaviour
 
     void Start()
     {
-        animationManager = GameObject.Find("AnimationManager").GetComponent<AnimationManager>();
     }
     
     void Update () 
