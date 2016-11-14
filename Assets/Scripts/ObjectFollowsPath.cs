@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class ObjectFollowsPath : MonoBehaviour {
 
     private List<Vector3> pathToFollow = new List<Vector3>();
-    private Vector3 tempPosition = new Vector3(0,0,0);
+    private Vector3 tempPosition;
     public float speed = 10f;
     public float elapsedTime = 0, finishTime = 3f;
     
@@ -23,17 +23,15 @@ public class ObjectFollowsPath : MonoBehaviour {
     {
         pathToFollow = path;
         gameObject.transform.position = pathToFollow[0];
-        tempPosition = pathToFollow[0];
         Vector3[] Path = new Vector3[pathToFollow.Count]; 
-        for(int i=0; i< pathToFollow.Count-1; i++)
+        for(int i=0; i < pathToFollow.Count; i++)
         {
             Path[i] = pathToFollow[i];
         }
 
-
         Hashtable moveHash = new Hashtable();
         moveHash.Add("path", Path);
-        moveHash.Add("time", 10f);
+        moveHash.Add("speed", 2f);
         moveHash.Add("axis", "x");
         moveHash.Add("delay", .1f);
         moveHash.Add("easeType", "linear");

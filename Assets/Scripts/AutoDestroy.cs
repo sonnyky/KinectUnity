@@ -7,7 +7,7 @@ public class AutoDestroy : MonoBehaviour {
     private AnimationManager animationManager;
     private BodySourceView bodiesInScene;
     private string currentObjectTrackingId;
-    private float lifetime = 2.0f;
+    private float lifetime = 5.0f;
     private float speed = 0.1f;
 
 	// Use this for initialization
