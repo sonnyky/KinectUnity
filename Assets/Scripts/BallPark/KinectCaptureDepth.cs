@@ -40,7 +40,7 @@ public class KinectCaptureDepth : MonoBehaviour
 
         roiHand = new OpenCVForUnity.Rect();
         roiHand.x = roiHand.y = -1;
-        effectPoint = new Point(0,0);
+        effectPoint = new Point(-1,-1);
 
         sensor = KinectSensor.GetDefault();
 
@@ -77,13 +77,12 @@ public class KinectCaptureDepth : MonoBehaviour
             gameObject.GetComponent<Renderer>().material.mainTexture = texture;
             Camera.main.orthographicSize = texture.height / 2;
             */
+
+            /*
             gameObject.transform.localScale = new Vector3(downscaleTexture.width, downscaleTexture.height, 1);
             gameObject.GetComponent<Renderer>().material.mainTexture = downscaleTexture;
             Camera.main.orthographicSize = downscaleTexture.height / 2;
-
-            // pixelize
-            pixelizeIntermediateMat = new Mat();
-            pixelizeSize0 = new Size();
+            */
         }
         else
         {
@@ -164,11 +163,12 @@ public class KinectCaptureDepth : MonoBehaviour
         Core.flip(downscaleMat, downscaleMat, 1);
 
         roiHand = filterRedColor(downscaleMat);
-        effectPoint = new Point(roiHand.x, roiHand.y);
-        Imgproc.circle(downscaleMat, effectPoint, 10, new OpenCVForUnity.Scalar(255, 0, 0));
+        effectPoint.x = roiHand.x;
+        effectPoint.y = roiHand.y;
+        //Imgproc.circle(downscaleMat, effectPoint, 10, new OpenCVForUnity.Scalar(255, 0, 0));
         roiHand.x = -1;
         
-        Utils.matToTexture(downscaleMat, downscaleTexture);
+        //Utils.matToTexture(downscaleMat, downscaleTexture);
     }
 
     void OnApplicationQuit()
@@ -225,7 +225,7 @@ public class KinectCaptureDepth : MonoBehaviour
                 bounding_rect = Imgproc.boundingRect(contours[i]); // Find the bounding rectangle for biggest contour
             }
             */
-            Debug.Log(a);
+            //Debug.Log(a);
             if(a > 50)
             {
                 bounding_rect = Imgproc.boundingRect(contours[i]);
