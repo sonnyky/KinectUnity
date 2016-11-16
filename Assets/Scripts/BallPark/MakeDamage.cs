@@ -21,12 +21,6 @@ public class MakeDamage : MonoBehaviour {
             PlayDead();
             isAlive = false;
         }
-
-        if (Input.anyKeyDown)
-        {
-            PlayDead();
-        }
-
 	}
 
     void OnCollisionStay(Collision col)

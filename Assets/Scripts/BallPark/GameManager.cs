@@ -11,8 +11,11 @@ public class GameManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (Input.GetKey("escape"))
+        if (Input.GetKey(KeyCode.Q))
+        {
             Application.Quit();
+        }
+           
         if (Input.GetKey(KeyCode.L))
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
