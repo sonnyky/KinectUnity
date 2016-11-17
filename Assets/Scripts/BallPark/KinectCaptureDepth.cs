@@ -226,7 +226,7 @@ public class KinectCaptureDepth : MonoBehaviour
             }
             */
             //Debug.Log(a);
-            if(a > 50)
+            if(a > 10)
             {
                 bounding_rect = Imgproc.boundingRect(contours[i]);
             }
