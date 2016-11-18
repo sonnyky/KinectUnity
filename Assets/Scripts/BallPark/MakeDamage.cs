@@ -3,14 +3,15 @@ using System.Collections;
 
 public class MakeDamage : MonoBehaviour {
 
-    private double hp = 150;
-    private double maxHP = 150;
+    private double hp;
+    private double maxHP = 1500;
     private bool isAlive = true;
     private GameObject parent;
     public GameObject hpBar;
 
 	// Use this for initialization
 	void Start () {
+        hp = maxHP;
         parent = GameObject.Find("dragon");
 	}
 	

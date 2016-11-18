@@ -78,11 +78,11 @@ public class KinectCaptureDepth : MonoBehaviour
             Camera.main.orthographicSize = texture.height / 2;
             */
 
-            /*
+            
             gameObject.transform.localScale = new Vector3(downscaleTexture.width, downscaleTexture.height, 1);
             gameObject.GetComponent<Renderer>().material.mainTexture = downscaleTexture;
             Camera.main.orthographicSize = downscaleTexture.height / 2;
-            */
+            
         }
         else
         {
@@ -165,10 +165,11 @@ public class KinectCaptureDepth : MonoBehaviour
         roiHand = filterRedColor(downscaleMat);
         effectPoint.x = roiHand.x;
         effectPoint.y = roiHand.y;
+        effectPoint = TransformPointToMatchProjector(effectPoint);
         //Imgproc.circle(downscaleMat, effectPoint, 10, new OpenCVForUnity.Scalar(255, 0, 0));
         roiHand.x = -1;
         
-        //Utils.matToTexture(downscaleMat, downscaleTexture);
+        Utils.matToTexture(downscaleMat, downscaleTexture);
     }
 
     void OnApplicationQuit()
@@ -236,6 +237,16 @@ public class KinectCaptureDepth : MonoBehaviour
         //rectangle(mask, bounding_rect, cv::Scalar(0, 255, 0), 1, 8, 0);
         //cv::imshow("skin", mask);
         return bounding_rect;
+    }
+    private Point TransformPointToMatchProjector(Point pointToTransform)
+    {
+        Point transformedPoint = new Point(); ;
+        float scaleX = 1.4f;float scaleY = 1.3f; float transX = -230f; float transY = -130f;
+
+        transformedPoint.x = (pointToTransform.x + transX) * scaleX;
+        transformedPoint.y = (pointToTransform.y + transY) * scaleY;
+
+        return transformedPoint;
     }
 
     public Point GetEffectPoint()
