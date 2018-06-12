@@ -1,4 +1,6 @@
-﻿Shader "Hidden/PKFx Depth Copy to Color"
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Hidden/PKFx Depth Copy to Color"
 {
 	Properties
 	{
@@ -36,7 +38,7 @@
 			v2f vert(appdata v)
 			{
 				v2f o;
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.uv = v.uv * (1 - _Flip) + _Flip * float2(v.uv.x, 1 - v.uv.y);
 				return o;
 			}
